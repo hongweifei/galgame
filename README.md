@@ -1,3 +1,13 @@
-# a-2d-fighting-game
+# galgame
 
-贡献代码加QQ1484205856
+qq:
+-
+>1484205856\
+>2519066800\
+>3541812089
+
+email:
+-
+>hongweifei@outlook.com\
+>hongweifei2@163.com
+
