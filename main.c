@@ -3,7 +3,7 @@
 
 void display()
 {
-    show("sylvie","./images/sylvie/sylvie blue giggle.png",334,700);
+    //show("sylvie","./images/sylvie/sylvie blue giggle.png");
 }
 
 int main()
