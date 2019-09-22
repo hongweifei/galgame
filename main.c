@@ -1,9 +1,10 @@
 
-#include "screens.h"
+#include "gal.h"
 
 void display()
 {
-    //show("sylvie","./images/sylvie/sylvie blue giggle.png");
+    scene("bg","./images/bg/bg meadow.jpg");
+    show("sylvie","./images/sylvie/sylvie blue giggle.png");
 }
 
 int main()

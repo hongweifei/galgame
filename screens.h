@@ -7,22 +7,13 @@
 #ifndef SCREENS_H_INCLUDED
 #define SCREENS_H_INCLUDED
 
-#define GAMESTATE_MAIN 0
-#define GAMESTATE_MENU_LOAD 1
-#define GAMESTATE_MENU_PREFERENCES 2
-#define GAMESTATE_MENU_ABOUT 3
-#define GAMESTATE_MENU_HELP 4
-
 static SDL_Window* window = NULL;
+static char* window_title;
 static int window_width = 0;
 static int window_height = 0;
-static int mouse_x = 0;
-static int mouse_y = 0;
 static SDL_Renderer* renderer = NULL;
 static SDL_Event event;
 static int quit = 0;
-
-static int GameState = GAMESTATE_MAIN;
 
 static int sceneN = 0;
 static char** scene_tag;
@@ -37,10 +28,6 @@ static char** show_path;
 static SDL_Rect* show_rect;
 static SDL_Surface** show_surface = NULL;
 static SDL_Texture** show_texture = NULL;
-
-SDL_Color color_gray = {136,136,136};
-SDL_Color color_blue = {0,153,204};
-SDL_Color color_white = {255,255,255};
 
 void scene(char* tag,char* path)
 {
@@ -168,132 +155,13 @@ void hide(char* tag)
 
 }
 
-void render_gui_label()
-{
-    if(label_state == LABEL_STATE_START)
-    {
-        draw_text(renderer,"Start Game",label_position[LABEL_START].x,label_position[LABEL_START].y,color_white);
-    }
-    else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_START].x,label_position[LABEL_START].y,label_position[LABEL_START].w,label_position[LABEL_START].h))
-        draw_text(renderer,"Start Game",label_position[LABEL_START].x,label_position[LABEL_START].y,color_blue);
-    else
-        label_position[0] = draw_text(renderer,"Start Game",window_width / 30,window_height / 3.2,color_gray);
-
-    if(label_state == LABEL_STATE_LOAD)
-    {
-        draw_text(renderer,"Load",label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,color_white);
-        GameState = GAMESTATE_MENU_LOAD;
-    }
-    else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,label_position[LABEL_LOAD].w,label_position[LABEL_LOAD].h))
-        draw_text(renderer,"Load",label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,color_blue);
-    else
-        label_position[LABEL_LOAD] = draw_text(renderer,"Load",window_width / 30,window_height / 2.6,color_gray);
-
-    if(label_state == LABEL_STATE_PREFERENCES)
-    {
-        draw_text(renderer,"Preferences",label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,color_white);
-        GameState = GAMESTATE_MENU_PREFERENCES;
-    }
-    else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,label_position[LABEL_PREFERENCES].w,label_position[LABEL_PREFERENCES].h))
-        draw_text(renderer,"Preferences",label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,color_blue);
-    else
-        label_position[LABEL_PREFERENCES] = draw_text(renderer,"Preferences",window_width / 30,window_height / 2.2,color_gray);
-
-    if(label_state == LABEL_STATE_ABOUT)
-    {
-        draw_text(renderer,"About",label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,color_white);
-        GameState = GAMESTATE_MENU_ABOUT;
-    }
-    else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,label_position[LABEL_ABOUT].w,label_position[LABEL_ABOUT].h))
-        draw_text(renderer,"About",label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,color_blue);
-    else
-        label_position[LABEL_ABOUT] = draw_text(renderer,"About",window_width / 30,window_height / 1.9,color_gray);
-
-    if(label_state == LABEL_STATE_HELP)
-    {
-        draw_text(renderer,"Help",label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,color_white);
-        GameState = GAMESTATE_MENU_HELP;
-    }
-    else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,label_position[LABEL_HELP].w,label_position[LABEL_HELP].h))
-        draw_text(renderer,"Help",label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,color_blue);
-    else
-        label_position[LABEL_HELP] = draw_text(renderer,"Help",window_width / 30,window_height / 1.68,color_gray);
-
-    if(label_state == LABEL_STATE_QUIT)
-    {
-        draw_text(renderer,"Quit",label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,color_white);
-        quit = 1;
-    }
-    else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,label_position[LABEL_QUIT].w,label_position[LABEL_QUIT].h))
-        draw_text(renderer,"Quit",label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,color_blue);
-    else
-        label_position[LABEL_QUIT] = draw_text(renderer,"Quit",window_width / 30,window_height / 1.5,color_gray);
-
-    if (GameState >= GAMESTATE_MENU_LOAD && GameState <= GAMESTATE_MENU_HELP)
-    {
-        if(label_state == LABEL_STATE_RETURN)
-        {
-            draw_text(renderer,"Return",label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,color_white);
-            GameState = GAMESTATE_MAIN;
-        }
-        else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,label_position[LABEL_RETURN].w,label_position[LABEL_RETURN].h))
-            draw_text(renderer,"Return",label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,color_blue);
-        else
-            label_position[LABEL_RETURN] = draw_text(renderer,"Return",window_width / 30,window_height / 1.2,color_gray);
-    }
-}
-
-void render_gui()
-{
-    int i;
-
-    if (GameState == GAMESTATE_MAIN)
-    {
-        draw(renderer,texture[GUI_BACKGROUND],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_MAIN_MENU],0,0,window_width,window_height);
-
-        render_gui_label();
-    }
-    else if (GameState == GAMESTATE_MENU_LOAD)
-    {
-        draw(renderer,texture[GUI_BACKGROUND],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_MAIN_MENU],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_GAME_MENU],0,0,window_width,window_height);
-
-        render_gui_label();
-    }
-    else if (GameState == GAMESTATE_MENU_PREFERENCES)
-    {
-        draw(renderer,texture[GUI_BACKGROUND],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_MAIN_MENU],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_GAME_MENU],0,0,window_width,window_height);
-
-        render_gui_label();
-    }
-    else if (GameState == GAMESTATE_MENU_ABOUT)
-    {
-        draw(renderer,texture[GUI_BACKGROUND],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_MAIN_MENU],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_GAME_MENU],0,0,window_width,window_height);
-
-        render_gui_label();
-    }
-    else if (GameState == GAMESTATE_MENU_HELP)
-    {
-        draw(renderer,texture[GUI_BACKGROUND],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_MAIN_MENU],0,0,window_width,window_height);
-        draw(renderer,texture[GUI_GAME_MENU],0,0,window_width,window_height);
-
-        render_gui_label();
-    }
-}
-
 void CreateWindow(const char* title,int width,int height)
 {
     SDL_Init(SDL_INIT_TIMER || SDL_INIT_GAMECONTROLLER || SDL_INIT_EVENTS);
     window = SDL_CreateWindow(title,SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,width,height,SDL_WINDOW_SHOWN);
-    renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window,-1,SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
 
+    window_title = (char*)title;
     window_width = width;
     window_height = height;
 
@@ -317,33 +185,32 @@ void mainloop(void (*DisplayFunction)())
             case SDL_QUIT:quit = 1;
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                if (event.button.button == SDL_BUTTON_LEFT)
-                {
-                    for (i = 0; i < 7; i++)
-                    {
-                       if(collision(mouse_x,mouse_y,1,1,label_position[i].x,label_position[i].y,label_position[i].w,label_position[i].h))
-                       {
-                          if (i == LABEL_START)
-                            label_state = LABEL_STATE_START;
-                          else if(i == LABEL_LOAD)
-                            label_state = LABEL_STATE_LOAD;
-                          else if(i == LABEL_PREFERENCES)
-                            label_state = LABEL_STATE_PREFERENCES;
-                          else if(i == LABEL_ABOUT)
-                            label_state = LABEL_STATE_ABOUT;
-                          else if(i == LABEL_HELP)
-                            label_state = LABEL_STATE_HELP;
-                          else if(i == LABEL_QUIT)
-                            label_state = LABEL_STATE_QUIT;
-                          else if(i == LABEL_RETURN)
-                            label_state = LABEL_STATE_RETURN;
-                          break;
-                       }
-                    }
-                }
+                //if (event.button.button == SDL_BUTTON_LEFT)
                 break;
             case SDL_MOUSEBUTTONUP:
-
+                for (i = 0; i < 7; i++)
+                {
+                     if(collision(mouse_x,mouse_y,1,1,label_position[i].x,label_position[i].y,label_position[i].w,label_position[i].h))
+                     {
+                          if (i == LABEL_START)
+                              label_state = LABEL_STATE_START;
+                          else if(i == LABEL_LOAD)
+                              label_state = LABEL_STATE_LOAD;
+                          else if(i == LABEL_PREFERENCES)
+                              label_state = LABEL_STATE_PREFERENCES;
+                          else if(i == LABEL_ABOUT)
+                              label_state = LABEL_STATE_ABOUT;
+                          else if(i == LABEL_HELP)
+                              label_state = LABEL_STATE_HELP;
+                          else if(i == LABEL_QUIT)
+                          {
+                              label_state = LABEL_STATE_QUIT;
+                              quit = 1;
+                          }
+                          else if(i == LABEL_RETURN)
+                              label_state = LABEL_STATE_RETURN;
+                     }
+                }
                 break;
             }
         }
@@ -351,11 +218,15 @@ void mainloop(void (*DisplayFunction)())
         SDL_GetMouseState(&mouse_x,&mouse_y);
 
         SDL_RenderClear(renderer);
+/*
+        if (GameState == GAMESTATE_GAME)
+            DisplayFunction();
+*/
+        render_gui(renderer,window_title,window_width,window_height);
 
-        render_gui();
-
-        DisplayFunction();
         SDL_RenderPresent(renderer);
+
+
     }
 
     for (i = 0;i < sceneN;i++)
