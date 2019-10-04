@@ -3,6 +3,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "gui.h"
+#include "message.h"
 
 #ifndef SCREENS_H_INCLUDED
 #define SCREENS_H_INCLUDED
@@ -14,6 +15,8 @@ static int window_height = 0;
 static SDL_Renderer* renderer = NULL;
 static SDL_Event event;
 static int quit = 0;
+
+static Message* msg;
 
 static int sceneN = 0;
 static char** scene_tag;
@@ -85,6 +88,8 @@ void scene(char* tag,char* path)
     SDL_RenderCopy(renderer,scene_texture[sceneN - 1],NULL,NULL);
 
     scene_finish = 1;
+
+    message_add(msg,SCENE,"p",path);
 }
 
 void show(char* tag,char* path)
@@ -148,6 +153,8 @@ void show(char* tag,char* path)
     showN++;
 
     SDL_RenderCopy(renderer,show_texture[showN - 1],NULL,&show_rect[showN - 1]);
+
+    message_add(msg,SHOW,"p",path);
 }
 
 void hide(char* tag)
@@ -165,6 +172,8 @@ void CreateWindow(const char* title,int width,int height)
     window_width = width;
     window_height = height;
 
+    msg = message_new();
+
     show_tag = (char**)malloc(sizeof(char*));
     show_path = (char**)malloc(sizeof(char*));
     show_rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
@@ -172,9 +181,27 @@ void CreateWindow(const char* title,int width,int height)
     gui_init(renderer);
 }
 
-void mainloop(void (*DisplayFunction)())
+void mainloop()
 {
     int i;
+    void* data;
+
+    for (i = 0; i < msg->type_list_N; i++)
+    {
+        data = message_get(msg);
+
+        switch (msg->type)
+        {
+            case SCENE:
+                printf("The type is scene.\n");
+                break;
+            case SHOW:
+                printf("The type is show.\n");
+                break;
+            case TALK:
+                break;
+        }
+    }
 
     while (!quit)
     {
@@ -218,15 +245,12 @@ void mainloop(void (*DisplayFunction)())
         SDL_GetMouseState(&mouse_x,&mouse_y);
 
         SDL_RenderClear(renderer);
-/*
-        if (GameState == GAMESTATE_GAME)
-            DisplayFunction();
-*/
+
+        //if (GameState == GAMESTATE_GAME)
+
         render_gui(renderer,window_title,window_width,window_height);
 
         SDL_RenderPresent(renderer);
-
-
     }
 
     for (i = 0;i < sceneN;i++)
