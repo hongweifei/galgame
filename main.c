@@ -1,22 +1,29 @@
 
+
 #include "gal.h"
 
-Character m;
+Character s;
 
 void game()
 {
     scene("bg","./images/bg/bg meadow.jpg");
     show("sylvie","./images/sylvie/sylvie blue giggle.png");
 
-    //say(m,"i am a sb.");
-    //say(m,"i am 12 years old.");
+    say(s,"I am a 15-year-old girl");
+    say(s,"My name is");
+    say(s,"S");
+    say(s,"y");
+    say(s,"l");
+    say(s,"v");
+    say(s,"i");
+    say(s,"e");
 }
 
 int main()
 {
     CreateWindow("demo",1280,720);
 
-    m = character_new("weifei",0,200,200);
+    s = character_new("Sylvie");
 
     game();
 

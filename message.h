@@ -153,6 +153,13 @@ char** message_get(Message* message)
 
     message->type = message->type_list[return_N];//将消息类型改为用到的消息的消息类型
 
+    if (message->type == SCENE)
+        i = 0;
+    else if(message->type == SCENE)
+        i = 0;
+    else if(message->type == TALK)
+        i = 2;
+
     while (1)//获取用到的消息的信息
     {
         char* data = strsep(&message->type_list_information[return_N],";");

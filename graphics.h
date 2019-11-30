@@ -1,6 +1,7 @@
 
 
 #include "window.h"
+#include "gui.h"
 
 #ifndef GRAPHICS_H_INCLUDED
 #define GRAPHICS_H_INCLUDED
@@ -20,8 +21,15 @@ static SDL_Rect* show_rect;
 static SDL_Surface** show_surface = NULL;
 static SDL_Texture** show_texture = NULL;
 
+static TTF_Font* font_name;
+static TTF_Font* font_text;
+
 void init_graphics()
 {
+    TTF_Init();
+    font_name = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",36);
+    font_text = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",24);
+
     show_tag = (char**)malloc(sizeof(char*));
     show_path = (char**)malloc(sizeof(char*));
     show_rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
@@ -136,6 +144,32 @@ void render_picture(char* tag,char* path)
 
     SDL_RenderCopy(renderer,show_texture[showN - 1],NULL,&show_rect[showN - 1]);
 }
+
+void render_text(char* name,char* text)
+{
+    SDL_Color color_name = {0,200,200};
+    SDL_Color color_text = {255,255,255};
+
+    draw(renderer,texture[GUI_TEXTBOX],0,window_height - window_height / 3.9,window_width,window_height / 3.9);
+
+    draw_text(renderer,font_name,name,window_width / 5.2,window_height - window_height / 3.9,color_name);
+    draw_text(renderer,font_text,text,window_width / 4.7,window_height - window_height / 5.5,color_text);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #endif //GRAPHICS_H_INCLUDED

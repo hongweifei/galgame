@@ -71,9 +71,10 @@ void CreateWindow(const char* title,int width,int height)
 
 void mainloop()
 {
-    int i;
+    int i,talk_n = 0,talk_now = 0;
     char** information[msg->type_list_N];
     int* information_type = calloc(1,sizeof(int));
+    int* information_talk = calloc(1,sizeof(int));
 
     printf("mainloop now\n");
 
@@ -83,6 +84,13 @@ void mainloop()
 
         information[i] = message_get(msg);
         information_type[i] = msg->type;
+
+        if(information_type[i] == TALK)
+        {
+            information_talk = realloc(information_talk,sizeof(int) * (talk_n + 1));
+            information_talk[talk_n] = i;
+            talk_n++;
+        }
     }
 
     while (!quit)
@@ -94,7 +102,14 @@ void mainloop()
             case SDL_QUIT:quit = 1;
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                //if (event.button.button == SDL_BUTTON_LEFT)
+                if (event.button.button == SDL_BUTTON_LEFT)
+                {
+                    if (GameState == GAMESTATE_GAME)
+                    {
+                        if ((talk_now + 1) < talk_n)
+                            talk_now++;
+                    }
+                }
                 break;
             case SDL_MOUSEBUTTONUP:
                 for (i = 0; i < 7; i++)
@@ -137,6 +152,8 @@ void mainloop()
                 else if(information_type[i] == SHOW)
                     render_picture(information[i][TYPE_TAG],information[i][TYPE_PATH]);
             }
+
+            render_text(information[information_talk[talk_now]][TYPE_NAME],information[information_talk[talk_now]][TYPE_WORD]);
         }
 
         render_gui(renderer,window_title,window_width,window_height);
