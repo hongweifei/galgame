@@ -8,8 +8,8 @@ void game()
     scene("bg","./images/bg/bg meadow.jpg");
     show("sylvie","./images/sylvie/sylvie blue giggle.png");
 
-    say(m,"i am a sb.");
-    say(m,"i am 12 years old.");
+    //say(m,"i am a sb.");
+    //say(m,"i am 12 years old.");
 }
 
 int main()

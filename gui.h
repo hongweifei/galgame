@@ -13,10 +13,11 @@
 #define GAMESTATE_MENU_HELP 4
 #define GAMESTATE_GAME 5
 
-#define GUI_N 3
+#define GUI_N 4
 #define GUI_BACKGROUND 0
 #define GUI_MAIN_MENU 1
 #define GUI_GAME_MENU 2
+#define GUI_TEXTBOX 3
 
 #define LABEL_N 7
 #define LABEL_START 0
@@ -26,6 +27,14 @@
 #define LABEL_HELP 4
 #define LABEL_QUIT 5
 #define LABEL_RETURN 6
+
+#define LABEL_TEXT_START "Start"
+#define LABEL_TEXT_LOAD "Load"
+#define LABEL_TEXT_PREFERENCES "Preferences"
+#define LABEL_TEXT_ABOUT "About"
+#define LABEL_TEXT_HELP "Help"
+#define LABEL_TEXT_QUIT "Quit"
+#define LABEL_TEXT_RETURN "Return"
 
 #define LABEL_STATE_NONE 0
 #define LABEL_STATE_START 1
@@ -41,13 +50,13 @@ static int GameState = GAMESTATE_MAIN;
 int mouse_x = 0;
 int mouse_y = 0;
 
+SDL_Texture* texture[GUI_N];
+
 TTF_Font* font_default;
 TTF_Font* font_big;
 TTF_Font* font_small;
-static SDL_Texture* texture_text;
 
-static SDL_Texture* texture[GUI_N];
-
+SDL_Texture** label_texture;
 SDL_Rect label_position[LABEL_N];
 int label_state = LABEL_STATE_NONE;
 
@@ -98,31 +107,18 @@ static SDL_Rect init_rect(int x,int y,int width,int height)
     return rect;
 }
 
-void draw(SDL_Renderer* renderer,SDL_Texture* texture,int x,int y,int width,int height)
+SDL_Rect draw(SDL_Renderer* renderer,SDL_Texture* texture,int x,int y,int width,int height)
 {
     SDL_Rect rect = {x,y,width,height};
     SDL_RenderCopy(renderer,texture,NULL,&rect);
+
+    return rect;
 }
 
-SDL_Rect draw_text(SDL_Renderer* renderer,TTF_Font* text_font,char* text,int x,int y,SDL_Color color)
-{
-    SDL_Surface* surface_text = TTF_RenderText_Solid(text_font,text,color);
-    texture_text = SDL_CreateTextureFromSurface(renderer,surface_text);
-
-    SDL_Rect dest = {x,y,surface_text->w,surface_text->h};
-
-    SDL_RenderCopy(renderer,texture_text,NULL,&dest);
-
-    SDL_FreeSurface(surface_text);
-    SDL_DestroyTexture(texture_text);
-
-    return dest;
-}
-
-int get_text_width(TTF_Font* text_font,char* text)
+int get_text_width(TTF_Font* font,char* text)
 {
     SDL_Color color = {0,0,0};
-    SDL_Surface* surface_text = TTF_RenderText_Solid(text_font,text,color);
+    SDL_Surface* surface_text = TTF_RenderText_Solid(font,text,color);
 
     int width = surface_text->w;
 
@@ -131,10 +127,10 @@ int get_text_width(TTF_Font* text_font,char* text)
     return width;
 }
 
-int get_text_height(TTF_Font* text_font,char* text)
+int get_text_height(TTF_Font* font,char* text)
 {
     SDL_Color color = {0,0,0};
-    SDL_Surface* surface_text = TTF_RenderText_Solid(text_font,text,color);
+    SDL_Surface* surface_text = TTF_RenderText_Solid(font,text,color);
 
     int height = surface_text->h;
 
@@ -143,111 +139,145 @@ int get_text_height(TTF_Font* text_font,char* text)
     return height;
 }
 
-void gui_init(SDL_Renderer* renderer)
+SDL_Texture* create_text(SDL_Renderer* renderer,TTF_Font* font,char* text,SDL_Color color)
+{
+    SDL_Surface* surface = TTF_RenderText_Solid(font,text,color);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer,surface);
+
+    SDL_FreeSurface(surface);
+
+    return texture;
+}
+
+SDL_Rect draw_text(SDL_Renderer* renderer,TTF_Font* font,char* text,int x,int y,SDL_Color color)
+{
+    SDL_Texture* texture = create_text(renderer,font,text,color);
+
+    SDL_Rect dest = {x,y,get_text_width(font,text),get_text_height(font,text)};
+
+    SDL_RenderCopy(renderer,texture,NULL,&dest);
+
+    SDL_DestroyTexture(texture);
+
+    return dest;
+}
+
+void init_gui(SDL_Renderer* renderer)
 {
     TTF_Init();
     font_default = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",20);
     font_big = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",48);
     font_small = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",14);
 
+    label_texture = (SDL_Texture**)malloc(sizeof(SDL_Texture*) * LABEL_N);
+    label_texture[LABEL_START] = create_text(renderer,font_default,LABEL_TEXT_START,color_gray);
+    label_texture[LABEL_LOAD] = create_text(renderer,font_default,LABEL_TEXT_LOAD,color_gray);
+    label_texture[LABEL_PREFERENCES] =  create_text(renderer,font_default,LABEL_TEXT_PREFERENCES,color_gray);
+    label_texture[LABEL_ABOUT] =  create_text(renderer,font_default,LABEL_TEXT_ABOUT,color_gray);
+    label_texture[LABEL_HELP] =  create_text(renderer,font_default,LABEL_TEXT_HELP,color_gray);
+    label_texture[LABEL_QUIT] =  create_text(renderer,font_default,LABEL_TEXT_QUIT,color_gray);
+    label_texture[LABEL_RETURN] =  create_text(renderer,font_default,LABEL_TEXT_RETURN,color_gray);
+
     texture[GUI_BACKGROUND] = init_img(renderer,"./gui/main_menu.png");
     texture[GUI_MAIN_MENU] = init_img(renderer,"./gui/overlay/main_menu.png");
     texture[GUI_GAME_MENU] = init_img(renderer,"./gui/overlay/game_menu.png");
+    texture[GUI_TEXTBOX] = init_img(renderer,"./gui/textbox.png");
 }
 
 void render_gui_label(SDL_Renderer* renderer,TTF_Font* text_font,int window_width,int window_height)
 {
     if(label_state == LABEL_STATE_START)
     {
-        draw_text(renderer,text_font,"Start Game",label_position[LABEL_START].x,label_position[LABEL_START].y,color_white);
+        draw_text(renderer,text_font,LABEL_TEXT_START,label_position[LABEL_START].x,label_position[LABEL_START].y,color_white);
         GameState = GAMESTATE_GAME;
     }
     else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_START].x,label_position[LABEL_START].y,label_position[LABEL_START].w,label_position[LABEL_START].h))
-        draw_text(renderer,text_font,"Start Game",label_position[LABEL_START].x,label_position[LABEL_START].y,color_blue);
+        draw_text(renderer,text_font,LABEL_TEXT_START,label_position[LABEL_START].x,label_position[LABEL_START].y,color_blue);
     else
-        label_position[0] = draw_text(renderer,text_font,"Start Game",window_width / 30,window_height / 3.2,color_gray);
+        label_position[0] = draw(renderer,label_texture[LABEL_START],window_width / 30,window_height / 3.2,get_text_width(text_font,LABEL_TEXT_START),get_text_height(text_font,LABEL_TEXT_START));
 
     if(label_state == LABEL_STATE_LOAD)
     {
-        draw_text(renderer,text_font,"Load",label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,color_white);
+        draw_text(renderer,text_font,LABEL_TEXT_LOAD,label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,color_white);
         GameState = GAMESTATE_MENU_LOAD;
     }
     else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,label_position[LABEL_LOAD].w,label_position[LABEL_LOAD].h))
-        draw_text(renderer,text_font,"Load",label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,color_blue);
+        draw_text(renderer,text_font,LABEL_TEXT_LOAD,label_position[LABEL_LOAD].x,label_position[LABEL_LOAD].y,color_blue);
     else
-        label_position[LABEL_LOAD] = draw_text(renderer,text_font,"Load",window_width / 30,window_height / 2.6,color_gray);
+        label_position[LABEL_LOAD] = draw(renderer,label_texture[LABEL_LOAD],window_width / 30,window_height / 2.6,get_text_width(text_font,LABEL_TEXT_LOAD),get_text_height(text_font,LABEL_TEXT_LOAD));
 
     if(label_state == LABEL_STATE_PREFERENCES)
     {
-        draw_text(renderer,text_font,"Preferences",label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,color_white);
+        draw_text(renderer,text_font,LABEL_TEXT_PREFERENCES,label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,color_white);
         GameState = GAMESTATE_MENU_PREFERENCES;
     }
     else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,label_position[LABEL_PREFERENCES].w,label_position[LABEL_PREFERENCES].h))
-        draw_text(renderer,text_font,"Preferences",label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,color_blue);
+        draw_text(renderer,text_font,LABEL_TEXT_PREFERENCES,label_position[LABEL_PREFERENCES].x,label_position[LABEL_PREFERENCES].y,color_blue);
     else
-        label_position[LABEL_PREFERENCES] = draw_text(renderer,text_font,"Preferences",window_width / 30,window_height / 2.2,color_gray);
+        label_position[LABEL_PREFERENCES] = draw(renderer,label_texture[LABEL_PREFERENCES],window_width / 30,window_height / 2.2,get_text_width(text_font,LABEL_TEXT_PREFERENCES),
+                                                get_text_height(text_font,LABEL_TEXT_PREFERENCES));
 
     if(label_state == LABEL_STATE_ABOUT)
     {
-        draw_text(renderer,text_font,"About",label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,color_white);
+        draw_text(renderer,text_font,LABEL_TEXT_ABOUT,label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,color_white);
         GameState = GAMESTATE_MENU_ABOUT;
     }
     else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,label_position[LABEL_ABOUT].w,label_position[LABEL_ABOUT].h))
-        draw_text(renderer,text_font,"About",label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,color_blue);
+        draw_text(renderer,text_font,LABEL_TEXT_ABOUT,label_position[LABEL_ABOUT].x,label_position[LABEL_ABOUT].y,color_blue);
     else
-        label_position[LABEL_ABOUT] = draw_text(renderer,text_font,"About",window_width / 30,window_height / 1.9,color_gray);
+        label_position[LABEL_ABOUT] = draw(renderer,label_texture[LABEL_ABOUT],window_width / 30,window_height / 1.9,get_text_width(text_font,LABEL_TEXT_ABOUT),get_text_height(text_font,LABEL_TEXT_ABOUT));
 
     if(label_state == LABEL_STATE_HELP)
     {
-        draw_text(renderer,text_font,"Help",label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,color_white);
+        draw_text(renderer,text_font,LABEL_TEXT_HELP,label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,color_white);
         GameState = GAMESTATE_MENU_HELP;
     }
     else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,label_position[LABEL_HELP].w,label_position[LABEL_HELP].h))
-        draw_text(renderer,text_font,"Help",label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,color_blue);
+        draw_text(renderer,text_font,LABEL_TEXT_HELP,label_position[LABEL_HELP].x,label_position[LABEL_HELP].y,color_blue);
     else
-        label_position[LABEL_HELP] = draw_text(renderer,text_font,"Help",window_width / 30,window_height / 1.68,color_gray);
+        label_position[LABEL_HELP] = draw(renderer,label_texture[LABEL_HELP],window_width / 30,window_height / 1.68,get_text_width(text_font,LABEL_TEXT_HELP),get_text_height(text_font,LABEL_TEXT_HELP));
 
     if(label_state == LABEL_STATE_QUIT)
     {
-        draw_text(renderer,text_font,"Quit",label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,color_white);
+        draw_text(renderer,text_font,LABEL_TEXT_QUIT,label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,color_white);
     }
     else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,label_position[LABEL_QUIT].w,label_position[LABEL_QUIT].h))
-        draw_text(renderer,text_font,"Quit",label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,color_blue);
+        draw_text(renderer,text_font,LABEL_TEXT_QUIT,label_position[LABEL_QUIT].x,label_position[LABEL_QUIT].y,color_blue);
     else
-        label_position[LABEL_QUIT] = draw_text(renderer,text_font,"Quit",window_width / 30,window_height / 1.5,color_gray);
+        label_position[LABEL_QUIT] = draw(renderer,label_texture[LABEL_QUIT],window_width / 30,window_height / 1.5,get_text_width(text_font,LABEL_TEXT_QUIT),get_text_height(text_font,LABEL_TEXT_QUIT));
 
     if (GameState >= GAMESTATE_MENU_LOAD && GameState <= GAMESTATE_MENU_HELP)
     {
         if(label_state == LABEL_STATE_RETURN)
         {
-            draw_text(renderer,text_font,"Return",label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,color_white);
+            draw_text(renderer,text_font,LABEL_TEXT_RETURN,label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,color_white);
             GameState = GAMESTATE_MAIN;
         }
         else if (collision(mouse_x,mouse_y,1,1,label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,label_position[LABEL_RETURN].w,label_position[LABEL_RETURN].h))
-            draw_text(renderer,text_font,"Return",label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,color_blue);
+            draw_text(renderer,text_font,LABEL_TEXT_RETURN,label_position[LABEL_RETURN].x,label_position[LABEL_RETURN].y,color_blue);
         else
-            label_position[LABEL_RETURN] = draw_text(renderer,text_font,"Return",window_width / 30,window_height / 1.2,color_gray);
+            label_position[LABEL_RETURN] = draw(renderer,label_texture[LABEL_RETURN],window_width / 30,window_height / 1.2,get_text_width(text_font,LABEL_TEXT_RETURN),get_text_height(text_font,LABEL_TEXT_RETURN));
     }
 }
 
 void render_gui_lable_load(SDL_Renderer* renderer,TTF_Font* text_font,int width,int height)
 {
-    draw_text(renderer,text_font,"Load",width / 25,height / 20,color_blue);
+    draw_text(renderer,text_font,LABEL_TEXT_LOAD,width / 25,height / 20,color_blue);
 }
 
 void render_gui_lable_Preferences(SDL_Renderer* renderer,TTF_Font* text_font,int width,int height)
 {
-    draw_text(renderer,text_font,"Preferences",width / 25,height / 20,color_blue);
+    draw_text(renderer,text_font,LABEL_TEXT_PREFERENCES,width / 25,height / 20,color_blue);
 }
 
 void render_gui_lable_about(SDL_Renderer* renderer,TTF_Font* text_font,int width,int height)
 {
-    draw_text(renderer,text_font,"About",width / 25,height / 20,color_blue);
+    draw_text(renderer,text_font,LABEL_TEXT_ABOUT,width / 25,height / 20,color_blue);
 }
 
 void render_gui_lable_help(SDL_Renderer* renderer,TTF_Font* text_font,int width,int height)
 {
-    draw_text(renderer,text_font,"Help",width / 25,height / 20,color_blue);
+    draw_text(renderer,text_font,LABEL_TEXT_HELP,width / 25,height / 20,color_blue);
 }
 
 void render_gui_label_game(SDL_Renderer* renderer,TTF_Font* text_font,int width,int height)
@@ -308,8 +338,6 @@ void render_gui(SDL_Renderer* renderer,char* title,int window_width,int window_h
     }
     else if (GameState == GAMESTATE_GAME)
     {
-        draw(renderer,texture[],0,window_height - window_height / 3.9,window_width,window_height / 3.9);
-
         render_gui_label_game(renderer,font_small,window_width,window_height);
     }
 

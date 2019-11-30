@@ -2,165 +2,43 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
+#include "window.h"
 #include "gui.h"
+#include "graphics.h"
 #include "message.h"
 
 #ifndef SCREENS_H_INCLUDED
 #define SCREENS_H_INCLUDED
 
-static SDL_Window* window = NULL;
-static char* window_title;
-static int window_width = 0;
-static int window_height = 0;
-static SDL_Renderer* renderer = NULL;
 static SDL_Event event;
 static int quit = 0;
 
+static int check = 0;
+
 static Message* msg;
-
-static int sceneN = 0;
-static char** scene_tag;
-static char** scene_path;
-static SDL_Surface** scene_surface = NULL;
-static SDL_Texture** scene_texture = NULL;
-static int scene_draw = 0,scene_finish = 0;
-
-static int showN = 0;
-static char** show_tag;
-static char** show_path;
-static SDL_Rect* show_rect;
-static SDL_Surface** show_surface = NULL;
-static SDL_Texture** show_texture = NULL;
+/*
+static int game_message_N;
+static int game_message_type;
+static char** game_message_tag;
+static char** game_message_path;
+static char** game_message_name;
+static char** game_message_word;
+*/
 
 void scene(char* tag,char* path)
 {
-    int i,new = 1;
-    int lengh_tag = sizeof(tag) / sizeof(char);
-    int lengh_path = sizeof(path) / sizeof(char);
-
-    scene_draw = 1;
-
-    for (i = 0; i < sceneN; i++)
-    {
-        if (scene_tag[i] == tag)
-        {
-            if (scene_path[i] != path)
-            {
-                SDL_FreeSurface(scene_surface[i]);
-                scene_surface[i] = IMG_Load(scene_path[i]);
-                scene_texture[i] = SDL_CreateTextureFromSurface(renderer,scene_surface[i]);
-            }
-
-            new = 0;
-        }
-
-        SDL_RenderCopy(renderer,scene_texture[i],NULL,NULL);
-
-        if (i == sceneN - 1)
-        {
-            if (!new)
-            {
-                scene_finish = 1;
-                return;
-            }
-            else
-                break;
-        }
-    }
-
-    scene_tag = realloc(scene_tag,sizeof(char*) * (sceneN + 1));
-    scene_tag[sceneN] = calloc(lengh_tag,sizeof(char));
-
-    scene_path = realloc(scene_path,sizeof(char*) * (sceneN + 1));
-    scene_path[sceneN] = calloc(lengh_path,sizeof(char));
-
-    scene_tag[sceneN] = tag;
-    scene_path[sceneN] = path;
-
-    sceneN++;
-
-    scene_surface = (SDL_Surface**)realloc(scene_surface,sizeof(SDL_Surface*) * sceneN);
-    scene_texture = (SDL_Texture**)realloc(scene_texture,sizeof(SDL_Texture*) * sceneN);
-
-    scene_surface[sceneN - 1] = IMG_Load(path);
-    scene_texture[sceneN - 1] = SDL_CreateTextureFromSurface(renderer,scene_surface[sceneN - 1]);
-
-    SDL_RenderCopy(renderer,scene_texture[sceneN - 1],NULL,NULL);
-
-    scene_finish = 1;
-
-    message_add(msg,SCENE,"p",path);
+    message_add(msg,SCENE,"tp",tag,path);
+    return;
 }
 
 void show(char* tag,char* path)
 {
-    int i,new = 1;
-    int lengh_tag = sizeof(tag) / sizeof(char);
-    int lengh_path = sizeof(path) / sizeof(char);
-
-    if (scene_draw)
-        if (!scene_finish)
-            return;
-
-    for (i = 0; i < showN; i++)
-    {
-        if (show_tag[i] == tag)
-        {
-            if (show_path[i] != path)
-            {
-                SDL_FreeSurface(show_surface[i]);
-                show_surface[i] = IMG_Load(show_path[i]);
-                show_texture[i] = SDL_CreateTextureFromSurface(renderer,show_surface[i]);
-                show_rect[i].w = show_surface[i]->w;
-                show_rect[i].h = show_surface[i]->h;
-            }
-
-            new = 0;
-        }
-
-        SDL_RenderCopy(renderer,show_texture[i],NULL,&show_rect[i]);
-
-        if (i == showN - 1)
-        {
-            if (!new)
-                return;
-            else
-                break;
-        }
-    }
-
-    show_surface = (SDL_Surface**)realloc(show_surface,sizeof(SDL_Surface*) * (showN + 1));
-    show_texture = (SDL_Texture**)realloc(show_texture,sizeof(SDL_Texture*) * (showN + 1));
-
-    show_surface[showN] = IMG_Load(path);
-    show_texture[showN] = SDL_CreateTextureFromSurface(renderer,show_surface[showN]);
-
-    show_tag = realloc(show_tag,sizeof(char*) * (showN + 1));
-    show_tag[showN] = calloc(lengh_tag,sizeof(char));
-
-    show_path = realloc(show_path,sizeof(char*) * (showN + 1));
-    show_path[showN] = calloc(lengh_path,sizeof(char));
-
-    show_rect = realloc(show_rect,sizeof(SDL_Rect) * (showN + 1));
-
-    show_tag[showN] = tag;
-    show_path[showN] = path;
-    show_rect[showN].x = window_width / 2 - show_surface[showN]->w / 2;
-    show_rect[showN].y = window_height - show_surface[showN]->h;
-    show_rect[showN].w = show_surface[showN]->w;
-    show_rect[showN].h = show_surface[showN]->h;
-
-    showN++;
-
-    SDL_RenderCopy(renderer,show_texture[showN - 1],NULL,&show_rect[showN - 1]);
-
-    message_add(msg,SHOW,"p",path);
+    message_add(msg,SHOW,"tp",tag,path);
+    return;
 }
 
 void hide(char* tag)
-{
-
-}
+{}
 
 void CreateWindow(const char* title,int width,int height)
 {
@@ -173,34 +51,38 @@ void CreateWindow(const char* title,int width,int height)
     window_height = height;
 
     msg = message_new();
+/*
+    game_message_N = 0;
+    game_message_type = NONE;
 
-    show_tag = (char**)malloc(sizeof(char*));
-    show_path = (char**)malloc(sizeof(char*));
-    show_rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+    game_message_tag = malloc(sizeof(char*));
+    game_message_path = malloc(sizeof(char*));
+    game_message_name = malloc(sizeof(char*));
+    game_message_word = malloc(sizeof(char*));
 
-    gui_init(renderer);
+    game_message_tag[game_message_N] = calloc(1,sizeof(char));
+    game_message_path[game_message_N] = calloc(1,sizeof(char));
+    game_message_name[game_message_N] = calloc(1,sizeof(char));
+    game_message_word[game_message_N] = calloc(1,sizeof(char));
+*/
+    init_graphics();
+    init_gui(renderer);
 }
 
 void mainloop()
 {
     int i;
-    void* data;
+    char** information[msg->type_list_N];
+    int* information_type = calloc(1,sizeof(int));
+
+    printf("mainloop now\n");
 
     for (i = 0; i < msg->type_list_N; i++)
     {
-        data = message_get(msg);
+        information_type = realloc(information_type,sizeof(int) * (i + 1));
 
-        switch (msg->type)
-        {
-            case SCENE:
-                printf("The type is scene.\n");
-                break;
-            case SHOW:
-                printf("The type is show.\n");
-                break;
-            case TALK:
-                break;
-        }
+        information[i] = message_get(msg);
+        information_type[i] = msg->type;
     }
 
     while (!quit)
@@ -246,7 +128,16 @@ void mainloop()
 
         SDL_RenderClear(renderer);
 
-        //if (GameState == GAMESTATE_GAME)
+        if (GameState == GAMESTATE_GAME)
+        {
+            for (i = 0; i < msg->type_list_N; i++)
+            {
+                if (information_type[i] == SCENE)
+                    render_scene(information[i][TYPE_TAG],information[i][TYPE_PATH]);
+                else if(information_type[i] == SHOW)
+                    render_picture(information[i][TYPE_TAG],information[i][TYPE_PATH]);
+            }
+        }
 
         render_gui(renderer,window_title,window_width,window_height);
 

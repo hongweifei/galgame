@@ -11,11 +11,20 @@
 #define SHOW 2
 #define TALK 3
 
-#define TEXT_PATH "path"
-#define TEXT_NAME "name"
-#define TEXT_WORD "word"
-#define TEXT_COLON ":"
-#define TEXT_SEMICOLON ";"
+#define TEXT_TYPE "type"  //text
+#define TEXT_TAG "tag"  //text
+#define TEXT_PATH "path" //text
+#define TEXT_NAME "name" //text
+#define TEXT_WORD "word" //text
+#define TEXT_COLON ":"   //text冒号
+#define TEXT_SEMICOLON ";" //text分号
+
+#define TYPE_N 5
+#define TYPE_TYPE 0
+#define TYPE_TAG 1
+#define TYPE_PATH 2
+#define TYPE_NAME 3
+#define TYPE_WORD 4
 
 typedef struct
 {
@@ -45,7 +54,8 @@ void message_add(Message* message,int type,char* type_information_type,...)
     va_list var_list;
     void* data;
 
-    int n = sizeof(type_information_type) / sizeof(char);
+    int n = strlen(type_information_type);
+    printf("%d\n", n);
 
     message->type_list = realloc(message->type_list,sizeof(int) * (message->type_list_N + 1));
     message->type_list[message->type_list_N] = type;
@@ -63,8 +73,12 @@ void message_add(Message* message,int type,char* type_information_type,...)
                 data = va_arg(var_list,char*);
                 printf("%s\n", data);
 
-                message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(char) * (strlen(message->type_list_information[message->type_list_N])
-                                                                                                                              + strlen(TEXT_NAME) + strlen(TEXT_COLON) + strlen(data) + strlen(TEXT_SEMICOLON)));
+                message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(char) *
+                (strlen(message->type_list_information[message->type_list_N]) + strlen(TEXT_NAME) + strlen(TEXT_COLON) + strlen(data) + strlen(TEXT_SEMICOLON)));
+
+                //message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(message->type_list_information[message->type_list_N]) +
+                //sizeof(TEXT_NAME) + sizeof(TEXT_COLON) + sizeof(data) + sizeof(TEXT_SEMICOLON));
+
                 strcat(message->type_list_information[message->type_list_N],TEXT_NAME);
                 strcat(message->type_list_information[message->type_list_N],TEXT_COLON);
                 strcat(message->type_list_information[message->type_list_N],data);
@@ -74,10 +88,28 @@ void message_add(Message* message,int type,char* type_information_type,...)
                 data = va_arg(var_list,char*);
                 printf("%s\n", data);
 
-                message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(char) * (strlen(message->type_list_information[message->type_list_N])
-                                                                                                                              + strlen(TEXT_WORD) + strlen(TEXT_COLON) + strlen(data) + strlen(TEXT_SEMICOLON)));
+                message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(char) *
+                (strlen(message->type_list_information[message->type_list_N]) + strlen(TEXT_WORD) + strlen(TEXT_COLON) + strlen(data) + strlen(TEXT_SEMICOLON)));
+
+                //message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(message->type_list_information[message->type_list_N]) +
+                //sizeof(TEXT_WORD) + sizeof(TEXT_COLON) + sizeof(data) + sizeof(TEXT_SEMICOLON));
 
                 strcat(message->type_list_information[message->type_list_N],TEXT_WORD);
+                strcat(message->type_list_information[message->type_list_N],TEXT_COLON);
+                strcat(message->type_list_information[message->type_list_N],data);
+                strcat(message->type_list_information[message->type_list_N],TEXT_SEMICOLON);
+                break;
+            case 't':
+                data = va_arg(var_list,char*);
+                printf("%s\n", data);
+
+                message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(char) *
+                (strlen(message->type_list_information[message->type_list_N]) + strlen(TEXT_TAG) + strlen(TEXT_COLON) + strlen(data) + strlen(TEXT_SEMICOLON)));
+
+                //message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(message->type_list_information[message->type_list_N]) +
+                //sizeof(TEXT_TAG) + sizeof(TEXT_COLON) + sizeof(data) + sizeof(TEXT_SEMICOLON));
+
+                strcat(message->type_list_information[message->type_list_N],TEXT_TAG);
                 strcat(message->type_list_information[message->type_list_N],TEXT_COLON);
                 strcat(message->type_list_information[message->type_list_N],data);
                 strcat(message->type_list_information[message->type_list_N],TEXT_SEMICOLON);
@@ -86,8 +118,12 @@ void message_add(Message* message,int type,char* type_information_type,...)
                 data = va_arg(var_list,char*);
                 printf("%s\n", data);
 
-                message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(char) * (strlen(message->type_list_information[message->type_list_N])
-                                                                                                                              + strlen(TEXT_PATH) + strlen(TEXT_COLON) + strlen(data) + strlen(TEXT_SEMICOLON)));
+                message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(char) *
+                (strlen(message->type_list_information[message->type_list_N]) + strlen(TEXT_PATH) + strlen(TEXT_COLON) + strlen(data) + strlen(TEXT_SEMICOLON)));
+
+                //message->type_list_information[message->type_list_N] = realloc(message->type_list_information[message->type_list_N],sizeof(message->type_list_information[message->type_list_N]) +
+                //sizeof(TEXT_PATH) + sizeof(TEXT_COLON) + sizeof(data) + sizeof(TEXT_SEMICOLON));
+
                 strcat(message->type_list_information[message->type_list_N],TEXT_PATH);
                 strcat(message->type_list_information[message->type_list_N],TEXT_COLON);
                 strcat(message->type_list_information[message->type_list_N],data);
@@ -104,19 +140,60 @@ void message_add(Message* message,int type,char* type_information_type,...)
     va_end(var_list);
 }
 
-char* message_get(Message* message)
+char** message_get(Message* message)
 {
-    if (message->type_list_N_useful == 0)
-        return NULL;
+    int return_N,i = 0;
+    char** information = calloc(TYPE_N,sizeof(char*));
 
-    int return_N = message->type_list_N - message->type_list_N_useful;
-    message->type_list_N_useful--;
+    if (message->type_list_N_useful == 0)//无可用消息
+        return information;
 
-    message->type = message->type_list[return_N];
+    return_N = message->type_list_N - message->type_list_N_useful;//用到的消息
+    message->type_list_N_useful--;//可用消息-1
 
-    return message->type_list_information[return_N];
+    message->type = message->type_list[return_N];//将消息类型改为用到的消息的消息类型
+
+    while (1)//获取用到的消息的信息
+    {
+        char* data = strsep(&message->type_list_information[return_N],";");
+        char* data_type =  strsep(&data,":");
+
+        printf("data_type:%s\n", data_type);
+        printf("data:%s\n", data);
+
+        if (data == NULL)
+            return information;
+
+        if (i == 0)
+        {
+            information[TYPE_TAG] = (char*)calloc(strlen(data),sizeof(char));
+            memcpy(information[TYPE_TAG],data,strlen(data) * sizeof(char));
+            printf("tag:%s\n", information[TYPE_TAG]);
+        }
+        else if (i == 1)
+        {
+            information[TYPE_PATH] = (char*)calloc(strlen(data),sizeof(char));
+            memcpy(information[TYPE_PATH],data,strlen(data) * sizeof(char));
+            printf("path:%s\n", information[TYPE_PATH]);
+        }
+        else if (i == 2)
+        {
+            information[TYPE_NAME] = (char*)calloc(strlen(data),sizeof(char));
+            memcpy(information[TYPE_NAME],data,strlen(data) * sizeof(char));
+            printf("name:%s\n", information[TYPE_NAME]);
+        }
+        else if (i == 3)
+        {
+            information[TYPE_WORD] = (char*)calloc(strlen(data),sizeof(char));
+            memcpy(information[TYPE_WORD],data,strlen(data) * sizeof(char));
+            printf("word:%s\n", information[TYPE_WORD]);
+        }
+
+        i++;
+    }
+
+    return information;//返回得到的消息信息
 }
-
 
 
 
