@@ -37,13 +37,13 @@ typedef struct
 
 Message* message_new()
 {
-    Message* message = (Message*)malloc(sizeof(Message));
+    Message* message = (Message*)calloc(1,sizeof(Message));
 
     message->type_list_N = 0;
     message->type_list_N_useful = 0;
-    message->type_list = (int*)malloc(sizeof(int) * (message->type_list_N + 1));
-    message->type_list_information = (char**)malloc(sizeof(char*));
-    message->type_list_information[message->type_list_N] = (char*)malloc(sizeof(char));
+    message->type_list = (int*)calloc(message->type_list_N + 1,sizeof(int));
+    message->type_list_information = (char**)calloc(1,sizeof(char*));
+    message->type_list_information[message->type_list_N] = (char*)calloc(1,sizeof(char));
 
     return message;
 }
@@ -54,14 +54,20 @@ void message_add(Message* message,int type,char* type_information_type,...)
     va_list var_list;
     void* data;
 
-    int n = strlen(type_information_type);
-    printf("%d\n", n);
+    int* type_list = (int*)realloc(message->type_list,sizeof(int) * (message->type_list_N + 1));
+    char** type_list_information = (char**)realloc(message->type_list_information,sizeof(char*) * (message->type_list_N + 1));
 
-    message->type_list = realloc(message->type_list,sizeof(int) * (message->type_list_N + 1));
+    int n = strlen(type_information_type);
+    //printf("%d\n", n);
+
+    message->type_list = type_list;
+    type_list = NULL;
+
     message->type_list[message->type_list_N] = type;
 
-    message->type_list_information = (char**)realloc(message->type_list_information,sizeof(char*) * (message->type_list_N + 1));
+    message->type_list_information = type_list_information;
     message->type_list_information[message->type_list_N] = calloc(1,sizeof(char));
+    type_list_information = NULL;
 
     va_start(var_list,type_information_type);
 
@@ -155,7 +161,7 @@ char** message_get(Message* message)
 
     if (message->type == SCENE)
         i = 0;
-    else if(message->type == SCENE)
+    else if(message->type == SHOW)
         i = 0;
     else if(message->type == TALK)
         i = 2;

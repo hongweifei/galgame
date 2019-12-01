@@ -12,6 +12,7 @@
 #define GAMESTATE_MENU_ABOUT 3
 #define GAMESTATE_MENU_HELP 4
 #define GAMESTATE_GAME 5
+#define GAMESTATE_GAMEOVER 6
 
 #define GUI_N 4
 #define GUI_BACKGROUND 0
@@ -62,6 +63,7 @@ int label_state = LABEL_STATE_NONE;
 
 SDL_Color color_gray = {136,136,136};
 SDL_Color color_blue = {0,153,204};
+SDL_Color color_black = {0,0,0};
 SDL_Color color_white = {255,255,255};
 
 int collision(int x1,int y1,int width1,int height1,int x2,int y2,int width2,int height2)
@@ -164,6 +166,8 @@ SDL_Rect draw_text(SDL_Renderer* renderer,TTF_Font* font,char* text,int x,int y,
 
 void init_gui(SDL_Renderer* renderer)
 {
+    printf("init gui\n");
+
     TTF_Init();
     font_default = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",20);
     font_big = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",48);
@@ -342,5 +346,27 @@ void render_gui(SDL_Renderer* renderer,char* title,int window_width,int window_h
     }
 
 }
+
+void release_gui()
+{
+    int i = 0;
+
+    for (i = 0; i < LABEL_N; i++)
+    {
+        SDL_DestroyTexture(label_texture[i]);
+    }
+    for (i = 0;i < GUI_N;i++)
+    {
+        SDL_DestroyTexture(texture[i]);
+    }
+}
+
+
+
+
+
+
+
+
 
 #endif //GUI_H_INCLUDED

@@ -1,10 +1,12 @@
 
 
-#include "window.h"
 #include "gui.h"
 
 #ifndef GRAPHICS_H_INCLUDED
 #define GRAPHICS_H_INCLUDED
+
+static int WIDTH;
+static int HEIGHT;
 
 static SDL_Renderer* renderer = NULL;
 
@@ -24,22 +26,27 @@ static SDL_Texture** show_texture = NULL;
 static TTF_Font* font_name;
 static TTF_Font* font_text;
 
-void init_graphics()
+void init_graphics(int width,int height)
 {
+    printf("init graphics\n");
+
+    WIDTH = width;
+    HEIGHT = height;
+
     TTF_Init();
     font_name = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",36);
     font_text = TTF_OpenFont("SourceHanSans-Light-Lite.ttf",24);
 
-    show_tag = (char**)malloc(sizeof(char*));
-    show_path = (char**)malloc(sizeof(char*));
-    show_rect = (SDL_Rect*)malloc(sizeof(SDL_Rect));
+    show_tag = (char**)calloc(1,sizeof(char*));
+    show_path = (char**)calloc(1,sizeof(char*));
+    show_rect = (SDL_Rect*)calloc(1,sizeof(SDL_Rect));
 }
 
 void render_scene(char* tag,char* path)
 {
     int i,new = 1;
-    int lengh_tag = sizeof(tag) / sizeof(char);
-    int lengh_path = sizeof(path) / sizeof(char);
+    int lengh_tag = strlen(tag);
+    int lengh_path = strlen(path);
 
     for (i = 0; i < sceneN; i++)
     {
@@ -48,16 +55,19 @@ void render_scene(char* tag,char* path)
             if (scene_path[i] != path)
             {
                 SDL_FreeSurface(scene_surface[i]);
-                scene_surface[i] = IMG_Load(scene_path[i]);
+                scene_surface[i] = IMG_Load(path);
                 scene_texture[i] = SDL_CreateTextureFromSurface(renderer,scene_surface[i]);
+
+                scene_path[i] = calloc(lengh_path,sizeof(char));
+                scene_path[i] = path;
             }
+
+            SDL_RenderCopy(renderer,scene_texture[i],NULL,NULL);
 
             new = 0;
         }
 
-        SDL_RenderCopy(renderer,scene_texture[i],NULL,NULL);
-
-        if (i == sceneN - 1)
+        if (i == showN - 1)
         {
             if (!new)
                 return;
@@ -89,8 +99,8 @@ void render_scene(char* tag,char* path)
 void render_picture(char* tag,char* path)
 {
     int i,new = 1;
-    int lengh_tag = sizeof(tag) / sizeof(char);
-    int lengh_path = sizeof(path) / sizeof(char);
+    int lengh_tag = strlen(tag);
+    int lengh_path = strlen(path);
 
     for (i = 0; i < showN; i++)
     {
@@ -99,16 +109,21 @@ void render_picture(char* tag,char* path)
             if (show_path[i] != path)
             {
                 SDL_FreeSurface(show_surface[i]);
-                show_surface[i] = IMG_Load(show_path[i]);
+                show_surface[i] = IMG_Load(path);
                 show_texture[i] = SDL_CreateTextureFromSurface(renderer,show_surface[i]);
+                show_rect[showN].x = WIDTH / 2 - show_surface[showN]->w / 2;
+                show_rect[showN].y = HEIGHT - show_surface[showN]->h;
                 show_rect[i].w = show_surface[i]->w;
                 show_rect[i].h = show_surface[i]->h;
+
+                show_path[i] = calloc(lengh_path,sizeof(char));
+                show_path[i] = path;
             }
+
+            SDL_RenderCopy(renderer,show_texture[i],NULL,&show_rect[i]);
 
             new = 0;
         }
-
-        SDL_RenderCopy(renderer,show_texture[i],NULL,&show_rect[i]);
 
         if (i == showN - 1)
         {
@@ -135,8 +150,8 @@ void render_picture(char* tag,char* path)
 
     show_tag[showN] = tag;
     show_path[showN] = path;
-    show_rect[showN].x = window_width / 2 - show_surface[showN]->w / 2;
-    show_rect[showN].y = window_height - show_surface[showN]->h;
+    show_rect[showN].x = WIDTH / 2 - show_surface[showN]->w / 2;
+    show_rect[showN].y = HEIGHT - show_surface[showN]->h;
     show_rect[showN].w = show_surface[showN]->w;
     show_rect[showN].h = show_surface[showN]->h;
 
@@ -150,20 +165,34 @@ void render_text(char* name,char* text)
     SDL_Color color_name = {0,200,200};
     SDL_Color color_text = {255,255,255};
 
-    draw(renderer,texture[GUI_TEXTBOX],0,window_height - window_height / 3.9,window_width,window_height / 3.9);
+    draw(renderer,texture[GUI_TEXTBOX],0,HEIGHT - HEIGHT / 3.9,WIDTH,HEIGHT / 3.9);
 
-    draw_text(renderer,font_name,name,window_width / 5.2,window_height - window_height / 3.9,color_name);
-    draw_text(renderer,font_text,text,window_width / 4.7,window_height - window_height / 5.5,color_text);
+    draw_text(renderer,font_name,name,WIDTH / 5.2,HEIGHT - HEIGHT / 3.9,color_name);
+    draw_text(renderer,font_text,text,WIDTH / 4.7,HEIGHT - HEIGHT / 5.5,color_text);
 }
 
+void release_graphics()
+{
+    int i = 0;
 
+    for (i = 0;i < sceneN;i++)
+    {
+        SDL_FreeSurface(scene_surface[i]);
+        SDL_DestroyTexture(scene_texture[i]);
+    }
+    for (i = 0; i < showN; i++)
+    {
+        SDL_FreeSurface(show_surface[i]);
+        SDL_DestroyTexture(show_texture[i]);
+    }
 
+    free(scene_tag);
+    free(scene_path);
 
-
-
-
-
-
+    free(show_tag);
+    free(show_path);
+    free(show_rect);
+}
 
 
 

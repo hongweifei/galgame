@@ -2,28 +2,39 @@
 
 #include "gal.h"
 
-Character s;
+Character* s,*m;
 
 void game()
 {
     scene("bg","./images/bg/bg meadow.jpg");
     show("sylvie","./images/sylvie/sylvie blue giggle.png");
 
-    say(s,"I am a 15-year-old girl");
-    say(s,"My name is");
-    say(s,"S");
-    say(s,"y");
-    say(s,"l");
-    say(s,"v");
-    say(s,"i");
-    say(s,"e");
+    say(s,"I am 15 years old");
+    say(s,"My name is Sylvie");
+    say(s,"I like playing computer games");
+    say(s,"What is your name?");
+    say(m,"Oh,I am Fly");
+
+    scene("bg","./images/bg/bg club.jpg");
+    show("sylvie","./images/sylvie/sylvie green giggle.png");
+    //show("sylvie","./images/sylvie/sylvie blue giggle.png");
+
+    say(s,"I watched <Naruto>  yesterday");
+    say(m,"Me too");
+
+    //scene("uni","./images/bg/bg uni.jpg");
+    show("sylvie","./images/sylvie/sylvie green surprised.png");
+
+    say(m,"Did you like to play basketball");
+    say(s,"No,I do not like");
 }
 
 int main()
 {
-    CreateWindow("demo",1280,720);
+    CreateWindow("A  demo",1280,720);
 
     s = character_new("Sylvie");
+    m = character_new("Me");
 
     game();
 
