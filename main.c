@@ -26,7 +26,7 @@ void game()
     show("sylvie","./images/sylvie/sylvie green surprised.png");
 
     say(m,"Did you like to play basketball");
-    say(s,"No,I do not like");
+    say(s,"No,I did not like");
 }
 
 int main()
